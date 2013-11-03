@@ -11,7 +11,7 @@ function checkPrice(callback) {
 
     fileIfExistsOrEnvironment('config.json', function(config) {
       sendEmail('Price is: ' + price, url, config.FROM_EMAIL, config.FROM_NAME,
-        config.TO_EMAIL, config.MANDRILL_API_KEY, callback);
+        config.TO_EMAIL, config.MANDRILL_APIKEY, callback);
     });
   }); 
 }

@@ -4,37 +4,58 @@ var request = require('request')
   , fs      = require('fs');
 
 function check_price(callback) {
-  fs.readFile('items.json', function (err, file) {
+  readJSON('items.json', function (err, result) {
     if (err) {
       console.log(err);
       return;
     }
 
-    var items = JSON.parse(file);
-
-    async.map(items['items'], check_item_selector_value, function (err, results) {
+    async.map(result['items'], check_item_selector_value, function (err, results) {
       if (err) {
         console.log(err);
         return;
       }
 
       async.filter(results, item_has_new_price, function (results) {
-        async.map(results, new_price_message_for_item, function (err, messages) {
-          if (err) {
-            console.log(err);
-            return;
-          }
+        if (results.length > 0) {
+          async.map(results, new_price_message_for_item, function (err, messages) {
+            if (err) {
+              console.log(err);
+              return;
+            }
 
-          var subject = 'Price change detected!'
-            , body    = messages.join('\n');
+            console.log('Sending email with body: ' + messages);
 
-          file_if_exists_or_environment('config.json', function (config) {
-            send_email(subject, body, config.FROM_EMAIL, config.FROM_NAME, config.TO_EMAIL, 
-              config.MANDRILL_APIKEY, callback);
+            var subject = 'Price change detected!'
+              , body    = messages.join('\n');
+
+            file_if_exists_or_environment('config.json', function (err, config) {
+              if (err) {
+                console.log(err);
+                return;
+              }
+
+              send_email(subject, body, config.FROM_EMAIL, config.FROM_NAME, config.TO_EMAIL,
+                config.MANDRILL_APIKEY, callback);
+            });
           });
-        });
+        }
+        else {
+          console.log('No changes found');
+        }
       });
     });
+  });
+}
+
+function readJSON(file_name, callback) {
+  fs.readFile(file_name, function (err, file) {
+    if (err) {
+      callback(err, null);
+    }
+    else {
+      callback(null, JSON.parse(file));
+    }
   });
 }
 
@@ -68,12 +89,17 @@ function check_item_selector_value(item, callback) {
 function file_if_exists_or_environment(file_name, callback) {
   fs.exists(file_name, function(exists) {
     if (exists) {
-      fs.readFile(file_name, function (err, file) {
-        callback(JSON.parse(file));
+      readJSON(file_name, function (err, result) {
+        if (err) {
+          callback(err, null);
+        }
+        else {
+          callback(null, result);
+        }
       });
     }
     else {
-      callback(process.env);
+      callback(null, process.env);
     }
   });
 }

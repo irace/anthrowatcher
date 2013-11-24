@@ -9,6 +9,16 @@
       "url" : "http://www.anthropologie.com/anthro/product/clothes-dresses/29255395.jsp",
       "selector" : "[itemprop=price]",
       "value" : "$248.00"
+    },
+    {
+      "url" : "http://www.anthropologie.com/anthro/product/clothes-loungewear/29216454.jsp",
+      "selector" : "[itemprop=price]",
+      "value" : "$98.00"
+    },
+    {
+      "url" : "http://www.anthropologie.com/anthro/product/home-bedding/28951580.jsp",
+      "selector" : "[itemprop=price]",
+      "value" : "$58.00$248.00"
     }
   ]
 }
